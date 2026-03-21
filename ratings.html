@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ratings — Tri Van Vo</title>
+  <title>Ratings — Trí V Võ</title>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -36,10 +37,7 @@
     .hero p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
     .hero .note { margin-top: 0.75rem; font-size: 0.8rem; color: var(--accent2); font-style: italic; }
 
-    #status {
-      max-width: 900px; margin: 1.5rem auto; padding: 0 3rem;
-      font-size: 0.85rem; color: var(--muted);
-    }
+    #status { max-width: 900px; margin: 1.5rem auto; padding: 0 3rem; font-size: 0.85rem; color: var(--muted); }
     .loading-dot { display: inline-block; animation: blink 1s infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
@@ -47,13 +45,30 @@
     .section-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 2rem; }
     .section-num { font-size: 0.7rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
     .section-title { font-family: 'Libre Baskerville', serif; font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+    .section-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 1.5rem; font-style: italic; }
 
-    /* CHART */
     .chart-wrap {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 4px; padding: 1.5rem; margin-bottom: 2rem;
-      position: relative; height: 320px;
+      position: relative;
     }
+    .chart-wrap canvas { width: 100% !important; }
+
+    /* TOP 5 CARDS */
+    .top5-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2rem; }
+    .top5-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.8rem 1rem;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      transition: border-color 0.15s;
+    }
+    .top5-row:hover { border-color: var(--accent); }
+    .top5-rank { font-family: 'Libre Baskerville', serif; font-size: 0.75rem; color: var(--muted); width: 20px; }
+    .top5-title { flex: 1; font-family: 'Libre Baskerville', serif; font-weight: 700; font-size: 0.9rem; }
+    .top5-bar-wrap { display: flex; align-items: center; gap: 0.6rem; width: 180px; }
+    .top5-bar-bg { flex: 1; height: 4px; background: var(--border); border-radius: 2px; }
+    .top5-bar-fill { height: 4px; border-radius: 2px; background: var(--accent); }
+    .top5-score { font-weight: 600; color: var(--accent); font-size: 0.85rem; min-width: 32px; text-align: right; }
 
     /* TABLE */
     .table-controls { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
@@ -64,6 +79,7 @@
     }
     .search-box:focus { border-color: var(--accent); }
     .sort-label { font-size: 0.78rem; color: var(--muted); }
+    .row-count { font-size: 0.78rem; color: var(--muted); margin-left: auto; }
 
     .tbl-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -71,8 +87,7 @@
     thead th {
       text-align: left; padding: 0.6rem 0.8rem;
       font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--muted); font-weight: 600; cursor: pointer; user-select: none;
-      white-space: nowrap;
+      color: var(--muted); font-weight: 600; cursor: pointer; user-select: none; white-space: nowrap;
     }
     thead th:hover { color: var(--accent); }
     thead th.sorted { color: var(--accent); }
@@ -80,7 +95,6 @@
     tbody tr:hover { background: var(--surface); }
     tbody td { padding: 0.75rem 0.8rem; }
     .td-title { font-family: 'Libre Baskerville', serif; font-weight: 700; font-size: 0.88rem; }
-    .td-score { font-weight: 600; color: var(--accent); }
     .td-meta { color: var(--muted); }
     .td-genre {
       display: inline-block; padding: 0.15rem 0.5rem;
@@ -92,8 +106,6 @@
     .score-bar-fill { height: 4px; border-radius: 2px; background: var(--accent); }
     .score-val { font-weight: 600; color: var(--accent); min-width: 30px; font-size: 0.85rem; }
 
-    .row-count { font-size: 0.78rem; color: var(--muted); margin-left: auto; }
-
     footer { max-width: 900px; margin: 0 auto; padding: 2rem 3rem; display: flex; justify-content: space-between; color: var(--muted); font-size: 0.78rem; }
   </style>
 </head>
@@ -101,10 +113,10 @@
 <nav>
   <div class="nav-logo">Trí V Võ</div>
   <ul class="nav-links">
-    <li><a href="#home">Home</a></li>
-    <li><a href="#food">Food</a></li>
-    <li><a href="ratings.html">Ratings</a></li>
-    <li><a href="#resume">Resume</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="index.html#food">Food</a></li>
+    <li><a href="ratings.html" class="active">Ratings</a></li>
+    <li><a href="index.html#resume">Resume</a></li>
   </ul>
 </nav>
 
@@ -126,7 +138,8 @@
       <span class="section-num">01</span>
       <h2 class="section-title">Games</h2>
     </div>
-    <div class="chart-wrap"><canvas id="games-chart"></canvas></div>
+    <p class="section-sub">Score distribution by genre — box shows 25th–75th percentile, line is median, whiskers show full range.</p>
+    <div class="chart-wrap" style="height:360px"><canvas id="games-chart"></canvas></div>
     <div class="table-controls">
       <input class="search-box" id="games-search" placeholder="Search games…" oninput="filterTable('games')"/>
       <span class="sort-label">Click column headers to sort</span>
@@ -155,7 +168,8 @@
       <span class="section-num">02</span>
       <h2 class="section-title">Movies</h2>
     </div>
-    <div class="chart-wrap"><canvas id="movies-chart"></canvas></div>
+    <p class="section-sub">Top 5 rated films.</p>
+    <div id="movies-top5" class="top5-list"></div>
     <div class="table-controls">
       <input class="search-box" id="movies-search" placeholder="Search movies…" oninput="filterTable('movies')"/>
       <span class="sort-label">Click column headers to sort</span>
@@ -182,7 +196,8 @@
       <span class="section-num">03</span>
       <h2 class="section-title">TV Shows</h2>
     </div>
-    <div class="chart-wrap"><canvas id="tv-chart"></canvas></div>
+    <p class="section-sub">Top 5 rated shows.</p>
+    <div id="tv-top5" class="top5-list"></div>
     <div class="table-controls">
       <input class="search-box" id="tv-search" placeholder="Search shows…" oninput="filterTable('tv')"/>
       <span class="sort-label">Click column headers to sort</span>
@@ -204,22 +219,18 @@
   </div>
 
   <footer>
-    <span>Tri Van Vo · 2026</span>
-    <span>trivanvo2412-beep.github.io</span>
+    <span>Trí V Võ · 2026</span>
+    <span>tri-van-vo.github.io</span>
   </footer>
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────────
-// Your Google Sheet CSV export URL
-// To update: File → Share → Publish to web → CSV → copy link
 const CSV_URL = "https://docs.google.com/spreadsheets/d/13NjpBYZbuSTNu9n0PR8rZ46HFQkbhmWqp7hQKJTk_Hk/export?format=csv&gid=0";
 
-// ── DATA STORE ──────────────────────────────────────────────────────────────
 let data = { games: [], movies: [], tv: [] };
 let sortState = { games: [1,'desc'], movies: [1,'desc'], tv: [1,'desc'] };
 
-// ── FETCH & PARSE ────────────────────────────────────────────────────────────
+// ── FETCH ────────────────────────────────────────────────────────────────────
 async function loadData() {
   try {
     const res = await fetch(CSV_URL);
@@ -227,76 +238,53 @@ async function loadData() {
     const text = await res.text();
     parseCSV(text);
     document.getElementById('status').style.display = 'none';
-    document.getElementById('games-section').style.display = '';
-    document.getElementById('movies-section').style.display = '';
-    document.getElementById('tv-section').style.display = '';
+    ['games','movies','tv'].forEach(t => document.getElementById(t+'-section').style.display = '');
     renderAll();
   } catch(e) {
     document.getElementById('status').innerHTML =
-      '⚠️ Could not load data. Make sure your Google Sheet is published to the web as CSV. <br><small>' + e.message + '</small>';
+      '⚠️ Could not load data. Make sure your Google Sheet is published to the web as CSV.<br><small>' + e.message + '</small>';
   }
 }
 
+// ── PARSE ────────────────────────────────────────────────────────────────────
 function parseCSV(text) {
-  const lines = text.split('\n').slice(4); // skip header rows
+  const lines = text.split('\n').slice(4);
   const games = [], movies = [], tv = [];
 
   for (const line of lines) {
     const cols = parseCSVLine(line);
     if (!cols || cols.length < 4) continue;
 
-    // GAMES: cols 0-5
     const gTitle = clean(cols[0]);
     const gScore = parseFloat(cols[1]);
     if (gTitle && !isNaN(gScore) && gScore > 0) {
-      games.push({
-        title: gTitle,
-        score: gScore,
-        fun: parseFloat(cols[2]) || 0,
-        quality: parseFloat(cols[3]) || 0,
-        art: parseFloat(cols[4]) || 0,
-        genre: clean(cols[5]) || '—'
-      });
+      games.push({ title: gTitle, score: gScore, fun: parseFloat(cols[2])||0, quality: parseFloat(cols[3])||0, art: parseFloat(cols[4])||0, genre: clean(cols[5])||'Other' });
     }
 
-    // MOVIES: cols 6-9
     if (cols.length > 9) {
       const mTitle = clean(cols[6]);
       const mScore = parseFloat(cols[7]);
       if (mTitle && !isNaN(mScore) && mScore > 0 && mTitle !== 'ERROR') {
-        movies.push({
-          title: mTitle,
-          score: mScore,
-          enjoyment: parseFloat(cols[8]) || 0,
-          art: parseFloat(cols[9]) || 0
-        });
+        movies.push({ title: mTitle, score: mScore, enjoyment: parseFloat(cols[8])||0, art: parseFloat(cols[9])||0 });
       }
     }
 
-    // TV: cols 10-13
     if (cols.length > 12) {
       const tTitle = clean(cols[10]);
       const tScore = parseFloat(cols[11]);
       if (tTitle && !isNaN(tScore) && tScore > 0) {
-        tv.push({
-          title: tTitle,
-          score: tScore,
-          enjoyment: parseFloat(cols[12]) || 0,
-          art: parseFloat(cols[13]) || 0
-        });
+        tv.push({ title: tTitle, score: tScore, enjoyment: parseFloat(cols[12])||0, art: parseFloat(cols[13])||0 });
       }
     }
   }
 
-  // Sort by score desc by default
   data.games  = games.sort((a,b) => b.score - a.score);
   data.movies = movies.sort((a,b) => b.score - a.score);
   data.tv     = tv.sort((a,b) => b.score - a.score);
 }
 
 function parseCSVLine(line) {
-  const result = [];
-  let cur = '', inQ = false;
+  const result = []; let cur = '', inQ = false;
   for (let i = 0; i < line.length; i++) {
     const c = line[i];
     if (c === '"') { inQ = !inQ; }
@@ -307,74 +295,53 @@ function parseCSVLine(line) {
   return result;
 }
 
-function clean(s) { return (s || '').replace(/"/g,'').trim(); }
+function clean(s) { return (s||'').replace(/"/g,'').trim(); }
 
-// ── RENDER ───────────────────────────────────────────────────────────────────
+// ── RENDER ALL ───────────────────────────────────────────────────────────────
 function renderAll() {
+  renderGamesBoxPlot();
+  renderTop5('movies');
+  renderTop5('tv');
   renderTable('games');
   renderTable('movies');
   renderTable('tv');
-  renderChart('games');
-  renderChart('movies');
-  renderChart('tv');
 }
 
-function renderTable(type, filtered) {
-  const rows = filtered || data[type];
-  const body = document.getElementById(type + '-body');
-  const count = document.getElementById(type + '-count');
-  count.textContent = rows.length + ' entries';
+// ── BOX PLOT (GAMES BY GENRE) ────────────────────────────────────────────────
+function renderGamesBoxPlot() {
+  // Group scores by genre
+  const byGenre = {};
+  data.games.forEach(g => {
+    const genre = g.genre || 'Other';
+    if (!byGenre[genre]) byGenre[genre] = [];
+    byGenre[genre].push(g.score);
+  });
 
-  if (type === 'games') {
-    body.innerHTML = rows.map(r => `
-      <tr>
-        <td class="td-title">${r.title}</td>
-        <td>
-          <div class="score-bar-wrap">
-            <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.score*10}%"></div></div>
-            <span class="score-val">${r.score.toFixed(2)}</span>
-          </div>
-        </td>
-        <td class="td-meta">${r.fun}</td>
-        <td class="td-meta">${r.quality}</td>
-        <td class="td-meta">${r.art}</td>
-        <td><span class="td-genre">${r.genre}</span></td>
-      </tr>`).join('');
-  } else {
-    body.innerHTML = rows.map(r => `
-      <tr>
-        <td class="td-title">${r.title}</td>
-        <td>
-          <div class="score-bar-wrap">
-            <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.score*10}%"></div></div>
-            <span class="score-val">${r.score.toFixed(2)}</span>
-          </div>
-        </td>
-        <td class="td-meta">${r.enjoyment}</td>
-        <td class="td-meta">${r.art}</td>
-      </tr>`).join('');
-  }
-}
+  // Only show genres with 2+ games, sort by median
+  const genres = Object.entries(byGenre)
+    .filter(([,scores]) => scores.length >= 2)
+    .sort(([,a],[,b]) => median(b) - median(a))
+    .map(([genre]) => genre);
 
-// ── CHARTS ───────────────────────────────────────────────────────────────────
-const charts = {};
-function renderChart(type) {
-  const top = data[type].slice(0, 20);
-  const labels = top.map(r => r.title.length > 22 ? r.title.slice(0,20)+'…' : r.title);
-  const scores = top.map(r => r.score);
-  const colors = scores.map(s => s >= 8 ? '#1a3a5c' : s >= 6 ? '#4a7aac' : '#a0b8d0');
+  const genreData = genres.map(g => byGenre[g]);
 
-  if (charts[type]) charts[type].destroy();
-  const ctx = document.getElementById(type + '-chart').getContext('2d');
-  charts[type] = new Chart(ctx, {
-    type: 'bar',
+  const ctx = document.getElementById('games-chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'boxplot',
     data: {
-      labels,
+      labels: genres,
       datasets: [{
-        data: scores,
-        backgroundColor: colors,
-        borderRadius: 2,
-        barThickness: 14,
+        label: 'Score by Genre',
+        data: genreData,
+        backgroundColor: 'rgba(26,58,92,0.15)',
+        borderColor: '#1a3a5c',
+        borderWidth: 1.5,
+        medianColor: '#c0392b',
+        whiskerColor: '#1a3a5c',
+        outlierBackgroundColor: '#c0392b',
+        outlierRadius: 3,
+        itemRadius: 2,
+        itemBackgroundColor: 'rgba(26,58,92,0.4)',
       }]
     },
     options: {
@@ -385,23 +352,69 @@ function renderChart(type) {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: ctx => ' ' + ctx.raw.toFixed(2) + ' / 10'
+            label: ctx => {
+              const s = ctx.raw;
+              return [`Min: ${s.min?.toFixed(1)}`, `Q1: ${s.q1?.toFixed(1)}`, `Median: ${s.median?.toFixed(1)}`, `Q3: ${s.q3?.toFixed(1)}`, `Max: ${s.max?.toFixed(1)}`];
+            }
           }
         }
       },
       scales: {
-        x: {
-          min: 0, max: 10,
-          grid: { color: '#e0e0dc' },
-          ticks: { font: { size: 10 }, color: '#777' }
-        },
-        y: {
-          grid: { display: false },
-          ticks: { font: { size: 10, family: 'Source Sans 3' }, color: '#1a1a1a' }
-        }
+        x: { min: 0, max: 10, grid: { color: '#e0e0dc' }, ticks: { font: { size: 10 }, color: '#777' } },
+        y: { grid: { display: false }, ticks: { font: { size: 11, family: 'Source Sans 3' }, color: '#1a1a1a' } }
       }
     }
   });
+}
+
+function median(arr) {
+  const s = [...arr].sort((a,b) => a-b);
+  const m = Math.floor(s.length/2);
+  return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+}
+
+// ── TOP 5 ────────────────────────────────────────────────────────────────────
+function renderTop5(type) {
+  const top = data[type].slice(0, 5);
+  const container = document.getElementById(type + '-top5');
+  const medals = ['🥇','🥈','🥉','4.','5.'];
+  container.innerHTML = top.map((r, i) => `
+    <div class="top5-row">
+      <span class="top5-rank">${medals[i]}</span>
+      <span class="top5-title">${r.title}</span>
+      <div class="top5-bar-wrap">
+        <div class="top5-bar-bg"><div class="top5-bar-fill" style="width:${r.score*10}%"></div></div>
+        <span class="top5-score">${r.score.toFixed(2)}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ── TABLE ────────────────────────────────────────────────────────────────────
+function renderTable(type, filtered) {
+  const rows = filtered || data[type];
+  const body = document.getElementById(type + '-body');
+  const count = document.getElementById(type + '-count');
+  count.textContent = rows.length + ' entries';
+
+  if (type === 'games') {
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td class="td-title">${r.title}</td>
+        <td><div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.score*10}%"></div></div><span class="score-val">${r.score.toFixed(2)}</span></div></td>
+        <td class="td-meta">${r.fun}</td>
+        <td class="td-meta">${r.quality}</td>
+        <td class="td-meta">${r.art}</td>
+        <td><span class="td-genre">${r.genre}</span></td>
+      </tr>`).join('');
+  } else {
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td class="td-title">${r.title}</td>
+        <td><div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.score*10}%"></div></div><span class="score-val">${r.score.toFixed(2)}</span></div></td>
+        <td class="td-meta">${r.enjoyment}</td>
+        <td class="td-meta">${r.art}</td>
+      </tr>`).join('');
+  }
 }
 
 // ── SORT ─────────────────────────────────────────────────────────────────────
@@ -409,27 +422,18 @@ function sortTable(type, col) {
   const [prevCol, prevDir] = sortState[type];
   const dir = (col === prevCol && prevDir === 'desc') ? 'asc' : 'desc';
   sortState[type] = [col, dir];
-
-  const keys = {
-    games:  ['title','score','fun','quality','art','genre'],
-    movies: ['title','score','enjoyment','art'],
-    tv:     ['title','score','enjoyment','art']
-  };
+  const keys = { games: ['title','score','fun','quality','art','genre'], movies: ['title','score','enjoyment','art'], tv: ['title','score','enjoyment','art'] };
   const key = keys[type][col];
-
   data[type].sort((a,b) => {
     const av = a[key], bv = b[key];
     if (typeof av === 'string') return dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
     return dir === 'asc' ? av - bv : bv - av;
   });
-
-  // update header indicators
   document.querySelectorAll(`#${type}-table thead th`).forEach((th,i) => {
     th.classList.toggle('sorted', i === col);
     if (i === col) th.textContent = th.textContent.replace(/[▾▴]/g,'') + (dir==='desc'?' ▾':' ▴');
     else th.textContent = th.textContent.replace(/[▾▴]/g,'').trim();
   });
-
   filterTable(type);
 }
 
@@ -440,7 +444,6 @@ function filterTable(type) {
   renderTable(type, filtered);
 }
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
 loadData();
 </script>
 </body>
