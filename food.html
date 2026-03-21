@@ -27,20 +27,48 @@
 
     .page { padding-top: 60px; }
 
-    .hero {
-      border-bottom: 1px solid var(--border);
-    }
-    .hero-inner {
-      max-width: 900px; margin: 0 auto;
-      padding: 3rem;
-    }
+    .hero { border-bottom: 1px solid var(--border); }
+    .hero-inner { max-width: 900px; margin: 0 auto; padding: 3rem; }
     .hero-divider { width: 40px; height: 2px; background: var(--accent2); margin-bottom: 1rem; }
     .hero-inner h1 { font-family: 'Libre Baskerville', serif; font-size: 2rem; color: var(--accent); margin-bottom: 0.4rem; }
     .hero-inner p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
 
-    /* GRID */
+    /* GRID WRAP */
     .grid-wrap { max-width: 900px; margin: 0 auto; padding: 3rem; }
 
+    /* SECTION DIVIDER */
+    .food-section { margin-bottom: 3rem; }
+
+    .food-section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .food-section-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .food-section-label {
+      font-size: 0.7rem;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .food-section-label span {
+      display: inline-block;
+      margin-right: 0.5rem;
+      color: var(--accent2);
+    }
+
+    /* GRID */
     .food-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -52,7 +80,6 @@
       nav { padding: 0 1.5rem; }
       .grid-wrap, .hero-inner { padding: 1.5rem; }
     }
-
     @media (max-width: 420px) {
       .food-grid { grid-template-columns: 1fr; }
     }
@@ -72,10 +99,8 @@
     }
 
     .food-img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      overflow: hidden;
-      background: var(--surface);
+      width: 100%; aspect-ratio: 1 / 1;
+      overflow: hidden; background: var(--surface);
       display: flex; align-items: center; justify-content: center;
       border-bottom: 1px solid var(--border);
     }
@@ -92,92 +117,56 @@
 
     .food-title {
       font-family: 'Libre Baskerville', serif;
-      font-size: 0.88rem;
-      font-weight: 700;
-      margin-bottom: 0.35rem;
-      color: var(--text);
+      font-size: 0.88rem; font-weight: 700;
+      margin-bottom: 0.35rem; color: var(--text);
     }
 
-    .food-desc {
-      font-size: 0.78rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
+    .food-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
 
     /* LIGHTBOX */
     .lightbox {
-      display: none;
-      position: fixed; inset: 0; z-index: 200;
+      display: none; position: fixed; inset: 0; z-index: 200;
       background: rgba(0,0,0,0.85);
-      align-items: center; justify-content: center;
-      padding: 2rem;
+      align-items: center; justify-content: center; padding: 2rem;
     }
     .lightbox.open { display: flex; }
 
     .lightbox-inner {
-      background: #fff;
-      border-radius: var(--radius);
-      max-width: 700px;
-      width: 100%;
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      background: #fff; border-radius: var(--radius);
+      max-width: 700px; width: 100%; overflow: hidden;
+      display: grid; grid-template-columns: 1fr 1fr;
     }
 
-    @media (max-width: 560px) {
-      .lightbox-inner { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 560px) { .lightbox-inner { grid-template-columns: 1fr; } }
 
-    .lightbox-img {
-      aspect-ratio: 1/1;
-      overflow: hidden;
-    }
-
-    .lightbox-img img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-    }
+    .lightbox-img { aspect-ratio: 1/1; overflow: hidden; }
+    .lightbox-img img { width: 100%; height: 100%; object-fit: cover; }
 
     .lightbox-info {
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      padding: 2rem; display: flex;
+      flex-direction: column; justify-content: center;
     }
 
     .lightbox-title {
       font-family: 'Libre Baskerville', serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--accent); margin-bottom: 0.5rem;
     }
 
     .lightbox-divider { width: 30px; height: 2px; background: var(--accent2); margin-bottom: 1rem; }
 
-    .lightbox-desc {
-      font-size: 0.88rem;
-      color: var(--muted);
-      line-height: 1.75;
-    }
+    .lightbox-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.75; }
 
     .lightbox-close {
-      position: absolute;
-      top: 1.5rem; right: 1.5rem;
-      color: #fff;
-      font-size: 1.5rem;
-      cursor: pointer;
-      background: none;
-      border: none;
-      line-height: 1;
-      opacity: 0.8;
-      transition: opacity 0.15s;
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      color: #fff; font-size: 1.5rem; cursor: pointer;
+      background: none; border: none; line-height: 1;
+      opacity: 0.8; transition: opacity 0.15s;
     }
     .lightbox-close:hover { opacity: 1; }
 
     footer {
-      max-width: 900px; margin: 0 auto;
-      padding: 2rem 3rem;
+      max-width: 900px; margin: 0 auto; padding: 2rem 3rem;
       display: flex; justify-content: space-between;
       color: var(--muted); font-size: 0.78rem;
       border-top: 1px solid var(--border);
@@ -206,18 +195,8 @@
   </div>
 
   <div class="grid-wrap">
-    <div class="food-grid">
 
-      <!-- ═══════════════════════════════════════════════
-           HOW TO ADD A NEW FOOD POST:
-
-           1. Upload your image to the images/ folder in GitHub
-           2. Copy one of the food-card blocks below
-           3. Change src="images/YOUR-IMAGE.jpg"
-           4. Update the title and description
-           5. Commit changes
-      ════════════════════════════════════════════════ -->
-
+    <!-- ═══════════════════ GENERAL ═══════════════════ -->
       <!-- CARD 1 -->
       <div class="food-card" onclick="openLightbox(this)">
         <div class="food-img">
@@ -242,9 +221,87 @@
 
       <!-- ADD MORE CARDS HERE following the same pattern -->
 
-      
 
+        <!-- Add more general cards here -->
+
+      </div>
     </div>
+
+    <!-- ═══════════════════ PACKED LUNCHES ═══════════════════ -->
+    <div class="food-section">
+      <div class="food-section-header">
+        <span class="food-section-label"><span>—</span> Packed Lunches</span>
+      </div>
+      <div class="food-grid">
+
+        <div class="food-card" onclick="openLightbox(this)">
+          <div class="food-img">
+            <img src="lunch_1.jpg" alt="Lunch 1"/>
+          </div>
+          <div class="food-info">
+            <div class="food-title">Lunch 1</div>
+            <div class="food-desc">Description here.</div>
+          </div>
+        </div>
+
+        <div class="food-card" onclick="openLightbox(this)">
+          <div class="food-img">
+            <img src="lunch_2.jpg" alt="Lunch 2"/>
+          </div>
+          <div class="food-info">
+            <div class="food-title">Lunch 2</div>
+            <div class="food-desc">Description here.</div>
+          </div>
+        </div>
+
+        <div class="food-card" onclick="openLightbox(this)">
+          <div class="food-img">
+            <img src="lunch_3.jpg" alt="Lunch 3"/>
+          </div>
+          <div class="food-info">
+            <div class="food-title">Lunch 3</div>
+            <div class="food-desc">Description here.</div>
+          </div>
+        </div>
+
+        <div class="food-card" onclick="openLightbox(this)">
+          <div class="food-img">
+            <img src="lunch_4.jpg" alt="Lunch 4"/>
+          </div>
+          <div class="food-info">
+            <div class="food-title">Lunch 4</div>
+            <div class="food-desc">Description here.</div>
+          </div>
+        </div>
+
+        <div class="food-card" onclick="openLightbox(this)">
+          <div class="food-img">
+            <img src="lunch_5.jpg" alt="Lunch 5"/>
+          </div>
+          <div class="food-info">
+            <div class="food-title">Lunch 5</div>
+            <div class="food-desc">Description here.</div>
+          </div>
+        </div>
+
+        <div class="food-card" onclick="openLightbox(this)">
+          <div class="food-img">
+            <img src="lunch_6.jpg" alt="Lunch 6"/>
+          </div>
+          <div class="food-info">
+            <div class="food-title">Lunch 6</div>
+            <div class="food-desc">Description here.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════ ADD MORE SECTIONS ═══════════════════
+         Copy the food-section block above to add new categories.
+         Just change the section label and add your cards inside.
+    ════════════════════════════════════════════════════════════ -->
+
   </div>
 
   <footer>
@@ -273,8 +330,8 @@
     const img   = card.querySelector('.food-img img');
     const title = card.querySelector('.food-title').textContent;
     const desc  = card.querySelector('.food-desc').textContent;
-    document.getElementById('lb-img').src    = img.src;
-    document.getElementById('lb-img').alt    = img.alt;
+    document.getElementById('lb-img').src   = img.src;
+    document.getElementById('lb-img').alt   = img.alt;
     document.getElementById('lb-title').textContent = title;
     document.getElementById('lb-desc').textContent  = desc;
     document.getElementById('lightbox').classList.add('open');
