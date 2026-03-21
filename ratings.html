@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ratings — Tri Van Vo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff; --surface: #f7f7f5; --border: #e0e0dc;
+      --accent: #1a3a5c; --accent2: #c0392b; --text: #1a1a1a; --muted: #777;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Source Sans 3', sans-serif; font-weight: 300; }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: #fff; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 3rem; height: 60px;
+    }
+    .nav-logo { font-family: 'Libre Baskerville', serif; font-size: 1rem; color: var(--accent); }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 400; letter-spacing: 0.8px; text-transform: uppercase; transition: color 0.15s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    .page { padding-top: 60px; }
+
+    .hero {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 3rem; max-width: 900px; margin: 0 auto;
+    }
+    .hero-divider { width: 40px; height: 2px; background: var(--accent2); margin-bottom: 1rem; }
+    .hero h1 { font-family: 'Libre Baskerville', serif; font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem; }
+    .hero p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+    .hero .note { margin-top: 0.75rem; font-size: 0.8rem; color: var(--accent2); font-style: italic; }
+
+    #status {
+      max-width: 900px; margin: 1.5rem auto; padding: 0 3rem;
+      font-size: 0.85rem; color: var(--muted);
+    }
+    .loading-dot { display: inline-block; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    .section-wrap { max-width: 900px; margin: 0 auto; padding: 3rem; border-bottom: 1px solid var(--border); }
+    .section-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 2rem; }
+    .section-num { font-size: 0.7rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+    .section-title { font-family: 'Libre Baskerville', serif; font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+
+    /* CHART */
+    .chart-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1.5rem; margin-bottom: 2rem;
+      position: relative; height: 320px;
+    }
+
+    /* TABLE */
+    .table-controls { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+    .search-box {
+      padding: 0.4rem 0.8rem; border: 1px solid var(--border); border-radius: 4px;
+      font-family: inherit; font-size: 0.82rem; width: 220px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .search-box:focus { border-color: var(--accent); }
+    .sort-label { font-size: 0.78rem; color: var(--muted); }
+
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    thead tr { border-bottom: 2px solid var(--accent); }
+    thead th {
+      text-align: left; padding: 0.6rem 0.8rem;
+      font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); font-weight: 600; cursor: pointer; user-select: none;
+      white-space: nowrap;
+    }
+    thead th:hover { color: var(--accent); }
+    thead th.sorted { color: var(--accent); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:hover { background: var(--surface); }
+    tbody td { padding: 0.75rem 0.8rem; }
+    .td-title { font-family: 'Libre Baskerville', serif; font-weight: 700; font-size: 0.88rem; }
+    .td-score { font-weight: 600; color: var(--accent); }
+    .td-meta { color: var(--muted); }
+    .td-genre {
+      display: inline-block; padding: 0.15rem 0.5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 2px; font-size: 0.72rem; color: var(--muted);
+    }
+    .score-bar-wrap { display: flex; align-items: center; gap: 0.6rem; }
+    .score-bar-bg { flex: 1; height: 4px; background: var(--border); border-radius: 2px; min-width: 60px; }
+    .score-bar-fill { height: 4px; border-radius: 2px; background: var(--accent); }
+    .score-val { font-weight: 600; color: var(--accent); min-width: 30px; font-size: 0.85rem; }
+
+    .row-count { font-size: 0.78rem; color: var(--muted); margin-left: auto; }
+
+    footer { max-width: 900px; margin: 0 auto; padding: 2rem 3rem; display: flex; justify-content: space-between; color: var(--muted); font-size: 0.78rem; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">Tri Van Vo</div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="index.html#food">Food</a></li>
+    <li><a href="ratings.html" class="active">Ratings</a></li>
+    <li><a href="index.html#resume">Resume</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div style="border-bottom: 1px solid var(--border);">
+    <div class="hero">
+      <div class="hero-divider"></div>
+      <h1>My Ratings</h1>
+      <p>Personal scores for games, movies, and TV shows. 5 is average — anything above is good-ish.</p>
+      <p class="note">↻ Data pulls live from my Google Sheet — always up to date.</p>
+    </div>
+  </div>
+
+  <div id="status"><span class="loading-dot">●</span> Loading data from Google Sheets…</div>
+
+  <!-- GAMES -->
+  <div id="games-section" class="section-wrap" style="display:none">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Games</h2>
+    </div>
+    <div class="chart-wrap"><canvas id="games-chart"></canvas></div>
+    <div class="table-controls">
+      <input class="search-box" id="games-search" placeholder="Search games…" oninput="filterTable('games')"/>
+      <span class="sort-label">Click column headers to sort</span>
+      <span class="row-count" id="games-count"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table id="games-table">
+        <thead>
+          <tr>
+            <th onclick="sortTable('games',0)">Title</th>
+            <th onclick="sortTable('games',1)">Score ▾</th>
+            <th onclick="sortTable('games',2)">Fun (80%)</th>
+            <th onclick="sortTable('games',3)">Quality (10%)</th>
+            <th onclick="sortTable('games',4)">Art (10%)</th>
+            <th onclick="sortTable('games',5)">Genre</th>
+          </tr>
+        </thead>
+        <tbody id="games-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MOVIES -->
+  <div id="movies-section" class="section-wrap" style="display:none">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Movies</h2>
+    </div>
+    <div class="chart-wrap"><canvas id="movies-chart"></canvas></div>
+    <div class="table-controls">
+      <input class="search-box" id="movies-search" placeholder="Search movies…" oninput="filterTable('movies')"/>
+      <span class="sort-label">Click column headers to sort</span>
+      <span class="row-count" id="movies-count"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table id="movies-table">
+        <thead>
+          <tr>
+            <th onclick="sortTable('movies',0)">Title</th>
+            <th onclick="sortTable('movies',1)">Score ▾</th>
+            <th onclick="sortTable('movies',2)">Enjoyment (70%)</th>
+            <th onclick="sortTable('movies',3)">Art (30%)</th>
+          </tr>
+        </thead>
+        <tbody id="movies-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TV -->
+  <div id="tv-section" class="section-wrap" style="display:none">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">TV Shows</h2>
+    </div>
+    <div class="chart-wrap"><canvas id="tv-chart"></canvas></div>
+    <div class="table-controls">
+      <input class="search-box" id="tv-search" placeholder="Search shows…" oninput="filterTable('tv')"/>
+      <span class="sort-label">Click column headers to sort</span>
+      <span class="row-count" id="tv-count"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table id="tv-table">
+        <thead>
+          <tr>
+            <th onclick="sortTable('tv',0)">Title</th>
+            <th onclick="sortTable('tv',1)">Score ▾</th>
+            <th onclick="sortTable('tv',2)">Enjoyment (75%)</th>
+            <th onclick="sortTable('tv',3)">Art (25%)</th>
+          </tr>
+        </thead>
+        <tbody id="tv-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <span>Tri Van Vo · 2026</span>
+    <span>trivanvo2412-beep.github.io</span>
+  </footer>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+// Your Google Sheet CSV export URL
+// To update: File → Share → Publish to web → CSV → copy link
+const CSV_URL = "https://docs.google.com/spreadsheets/d/13NjpBYZbuSTNu9n0PR8rZ46HFQkbhmWqp7hQKJTk_Hk/export?format=csv&gid=0";
+
+// ── DATA STORE ──────────────────────────────────────────────────────────────
+let data = { games: [], movies: [], tv: [] };
+let sortState = { games: [1,'desc'], movies: [1,'desc'], tv: [1,'desc'] };
+
+// ── FETCH & PARSE ────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res = await fetch(CSV_URL);
+    if (!res.ok) throw new Error("Network error");
+    const text = await res.text();
+    parseCSV(text);
+    document.getElementById('status').style.display = 'none';
+    document.getElementById('games-section').style.display = '';
+    document.getElementById('movies-section').style.display = '';
+    document.getElementById('tv-section').style.display = '';
+    renderAll();
+  } catch(e) {
+    document.getElementById('status').innerHTML =
+      '⚠️ Could not load data. Make sure your Google Sheet is published to the web as CSV. <br><small>' + e.message + '</small>';
+  }
+}
+
+function parseCSV(text) {
+  const lines = text.split('\n').slice(4); // skip header rows
+  const games = [], movies = [], tv = [];
+
+  for (const line of lines) {
+    const cols = parseCSVLine(line);
+    if (!cols || cols.length < 4) continue;
+
+    // GAMES: cols 0-5
+    const gTitle = clean(cols[0]);
+    const gScore = parseFloat(cols[1]);
+    if (gTitle && !isNaN(gScore) && gScore > 0) {
+      games.push({
+        title: gTitle,
+        score: gScore,
+        fun: parseFloat(cols[2]) || 0,
+        quality: parseFloat(cols[3]) || 0,
+        art: parseFloat(cols[4]) || 0,
+        genre: clean(cols[5]) || '—'
+      });
+    }
+
+    // MOVIES: cols 6-9
+    if (cols.length > 9) {
+      const mTitle = clean(cols[6]);
+      const mScore = parseFloat(cols[7]);
+      if (mTitle && !isNaN(mScore) && mScore > 0 && mTitle !== 'ERROR') {
+        movies.push({
+          title: mTitle,
+          score: mScore,
+          enjoyment: parseFloat(cols[8]) || 0,
+          art: parseFloat(cols[9]) || 0
+        });
+      }
+    }
+
+    // TV: cols 10-13
+    if (cols.length > 12) {
+      const tTitle = clean(cols[10]);
+      const tScore = parseFloat(cols[11]);
+      if (tTitle && !isNaN(tScore) && tScore > 0) {
+        tv.push({
+          title: tTitle,
+          score: tScore,
+          enjoyment: parseFloat(cols[12]) || 0,
+          art: parseFloat(cols[13]) || 0
+        });
+      }
+    }
+  }
+
+  // Sort by score desc by default
+  data.games  = games.sort((a,b) => b.score - a.score);
+  data.movies = movies.sort((a,b) => b.score - a.score);
+  data.tv     = tv.sort((a,b) => b.score - a.score);
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur);
+  return result;
+}
+
+function clean(s) { return (s || '').replace(/"/g,'').trim(); }
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderTable('games');
+  renderTable('movies');
+  renderTable('tv');
+  renderChart('games');
+  renderChart('movies');
+  renderChart('tv');
+}
+
+function renderTable(type, filtered) {
+  const rows = filtered || data[type];
+  const body = document.getElementById(type + '-body');
+  const count = document.getElementById(type + '-count');
+  count.textContent = rows.length + ' entries';
+
+  if (type === 'games') {
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td class="td-title">${r.title}</td>
+        <td>
+          <div class="score-bar-wrap">
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.score*10}%"></div></div>
+            <span class="score-val">${r.score.toFixed(2)}</span>
+          </div>
+        </td>
+        <td class="td-meta">${r.fun}</td>
+        <td class="td-meta">${r.quality}</td>
+        <td class="td-meta">${r.art}</td>
+        <td><span class="td-genre">${r.genre}</span></td>
+      </tr>`).join('');
+  } else {
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td class="td-title">${r.title}</td>
+        <td>
+          <div class="score-bar-wrap">
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.score*10}%"></div></div>
+            <span class="score-val">${r.score.toFixed(2)}</span>
+          </div>
+        </td>
+        <td class="td-meta">${r.enjoyment}</td>
+        <td class="td-meta">${r.art}</td>
+      </tr>`).join('');
+  }
+}
+
+// ── CHARTS ───────────────────────────────────────────────────────────────────
+const charts = {};
+function renderChart(type) {
+  const top = data[type].slice(0, 20);
+  const labels = top.map(r => r.title.length > 22 ? r.title.slice(0,20)+'…' : r.title);
+  const scores = top.map(r => r.score);
+  const colors = scores.map(s => s >= 8 ? '#1a3a5c' : s >= 6 ? '#4a7aac' : '#a0b8d0');
+
+  if (charts[type]) charts[type].destroy();
+  const ctx = document.getElementById(type + '-chart').getContext('2d');
+  charts[type] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: scores,
+        backgroundColor: colors,
+        borderRadius: 2,
+        barThickness: 14,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + ctx.raw.toFixed(2) + ' / 10'
+          }
+        }
+      },
+      scales: {
+        x: {
+          min: 0, max: 10,
+          grid: { color: '#e0e0dc' },
+          ticks: { font: { size: 10 }, color: '#777' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { size: 10, family: 'Source Sans 3' }, color: '#1a1a1a' }
+        }
+      }
+    }
+  });
+}
+
+// ── SORT ─────────────────────────────────────────────────────────────────────
+function sortTable(type, col) {
+  const [prevCol, prevDir] = sortState[type];
+  const dir = (col === prevCol && prevDir === 'desc') ? 'asc' : 'desc';
+  sortState[type] = [col, dir];
+
+  const keys = {
+    games:  ['title','score','fun','quality','art','genre'],
+    movies: ['title','score','enjoyment','art'],
+    tv:     ['title','score','enjoyment','art']
+  };
+  const key = keys[type][col];
+
+  data[type].sort((a,b) => {
+    const av = a[key], bv = b[key];
+    if (typeof av === 'string') return dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    return dir === 'asc' ? av - bv : bv - av;
+  });
+
+  // update header indicators
+  document.querySelectorAll(`#${type}-table thead th`).forEach((th,i) => {
+    th.classList.toggle('sorted', i === col);
+    if (i === col) th.textContent = th.textContent.replace(/[▾▴]/g,'') + (dir==='desc'?' ▾':' ▴');
+    else th.textContent = th.textContent.replace(/[▾▴]/g,'').trim();
+  });
+
+  filterTable(type);
+}
+
+// ── FILTER ───────────────────────────────────────────────────────────────────
+function filterTable(type) {
+  const q = document.getElementById(type + '-search').value.toLowerCase();
+  const filtered = q ? data[type].filter(r => r.title.toLowerCase().includes(q)) : data[type];
+  renderTable(type, filtered);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
