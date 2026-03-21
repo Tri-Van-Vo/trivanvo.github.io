@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Food — Trí V Võ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff; --surface: #f7f7f5; --border: #e0e0dc;
+      --accent: #1a3a5c; --accent2: #c0392b; --text: #1a1a1a; --muted: #777;
+      --radius: 4px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Source Sans 3', sans-serif; font-weight: 300; }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: #fff; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 3rem; height: 60px;
+    }
+    .nav-logo { font-family: 'Libre Baskerville', serif; font-size: 1rem; color: var(--accent); }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 400; letter-spacing: 0.8px; text-transform: uppercase; transition: color 0.15s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    .page { padding-top: 60px; }
+
+    .hero {
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-inner {
+      max-width: 900px; margin: 0 auto;
+      padding: 3rem;
+    }
+    .hero-divider { width: 40px; height: 2px; background: var(--accent2); margin-bottom: 1rem; }
+    .hero-inner h1 { font-family: 'Libre Baskerville', serif; font-size: 2rem; color: var(--accent); margin-bottom: 0.4rem; }
+    .hero-inner p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+
+    /* GRID */
+    .grid-wrap { max-width: 900px; margin: 0 auto; padding: 3rem; }
+
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 680px) {
+      .food-grid { grid-template-columns: repeat(2, 1fr); }
+      nav { padding: 0 1.5rem; }
+      .grid-wrap, .hero-inner { padding: 1.5rem; }
+    }
+
+    @media (max-width: 420px) {
+      .food-grid { grid-template-columns: 1fr; }
+    }
+
+    .food-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #fff;
+      transition: box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .food-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.09);
+      transform: translateY(-2px);
+    }
+
+    .food-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .food-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .food-card:hover .food-img img { transform: scale(1.03); }
+
+    .food-info { padding: 0.9rem 1rem 1rem; }
+
+    .food-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      color: var(--text);
+    }
+
+    .food-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* LIGHTBOX */
+    .lightbox {
+      display: none;
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.85);
+      align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    .lightbox.open { display: flex; }
+
+    .lightbox-inner {
+      background: #fff;
+      border-radius: var(--radius);
+      max-width: 700px;
+      width: 100%;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 560px) {
+      .lightbox-inner { grid-template-columns: 1fr; }
+    }
+
+    .lightbox-img {
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+
+    .lightbox-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .lightbox-info {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .lightbox-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .lightbox-divider { width: 30px; height: 2px; background: var(--accent2); margin-bottom: 1rem; }
+
+    .lightbox-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 1.5rem; right: 1.5rem;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      line-height: 1;
+      opacity: 0.8;
+      transition: opacity 0.15s;
+    }
+    .lightbox-close:hover { opacity: 1; }
+
+    footer {
+      max-width: 900px; margin: 0 auto;
+      padding: 2rem 3rem;
+      display: flex; justify-content: space-between;
+      color: var(--muted); font-size: 0.78rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Trí V Võ</div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="food.html" class="active">Food</a></li>
+    <li><a href="ratings.html">Ratings</a></li>
+    <li><a href="index.html#resume">Resume</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-divider"></div>
+      <h1>Food</h1>
+      <p>Things I've eaten and felt strongly enough about to document.</p>
+    </div>
+  </div>
+
+  <div class="grid-wrap">
+    <div class="food-grid">
+
+      <!-- ═══════════════════════════════════════════════
+           HOW TO ADD A NEW FOOD POST:
+
+           1. Upload your image to the images/ folder in GitHub
+           2. Copy one of the food-card blocks below
+           3. Change src="images/YOUR-IMAGE.jpg"
+           4. Update the title and description
+           5. Commit changes
+      ════════════════════════════════════════════════ -->
+
+      <!-- CARD 1 -->
+      <div class="food-card" onclick="openLightbox(this)">
+        <div class="food-img">
+          <img src="images/pho.jpg" alt="Pho Bo"/>
+        </div>
+        <div class="food-info">
+          <div class="food-title">Pho Bo — Pho Xe Lua</div>
+          <div class="food-desc">Rich broth, perfectly chewy noodles. The basil was fresh and the beef melted in your mouth.</div>
+        </div>
+      </div>
+
+      <!-- CARD 2 -->
+      <div class="food-card" onclick="openLightbox(this)">
+        <div class="food-img">
+          <img src="images/pizza.jpg" alt="Margherita Pizza"/>
+        </div>
+        <div class="food-info">
+          <div class="food-title">Margherita — Ian's Pizza</div>
+          <div class="food-desc">Classic done right. Thin crust, quality mozz, simple tomato sauce. No notes.</div>
+        </div>
+      </div>
+
+      <!-- ADD MORE CARDS HERE following the same pattern -->
+
+    </div>
+  </div>
+
+  <footer>
+    <span>Trí V Võ · 2026</span>
+    <span>tri-van-vo.github.io</span>
+  </footer>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <div class="lightbox-inner">
+    <div class="lightbox-img">
+      <img id="lb-img" src="" alt=""/>
+    </div>
+    <div class="lightbox-info">
+      <div class="lightbox-title" id="lb-title"></div>
+      <div class="lightbox-divider"></div>
+      <div class="lightbox-desc" id="lb-desc"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openLightbox(card) {
+    const img   = card.querySelector('.food-img img');
+    const title = card.querySelector('.food-title').textContent;
+    const desc  = card.querySelector('.food-desc').textContent;
+    document.getElementById('lb-img').src    = img.src;
+    document.getElementById('lb-img').alt    = img.alt;
+    document.getElementById('lb-title').textContent = title;
+    document.getElementById('lb-desc').textContent  = desc;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox(e) {
+    if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lightbox-close')) return;
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox({}); });
+</script>
+
+</body>
+</html>
